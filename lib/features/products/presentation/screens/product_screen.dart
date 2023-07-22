@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:teslo_shop/features/products/presentation/providers/product_provider.dart';
 
 class ProductSreen extends ConsumerStatefulWidget {
 
@@ -12,6 +13,14 @@ class ProductSreen extends ConsumerStatefulWidget {
 }
 
 class ProductSreenState extends ConsumerState<ProductSreen> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    ref.read(productProvider(widget.productId).notifier);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
