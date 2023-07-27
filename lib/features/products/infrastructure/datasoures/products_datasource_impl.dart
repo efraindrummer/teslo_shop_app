@@ -3,7 +3,8 @@
 import 'package:dio/dio.dart';
 import 'package:teslo_shop/config/config.dart';
 import 'package:teslo_shop/features/products/domain/domain.dart';
-import 'package:teslo_shop/features/products/infrastructure/errors/product_errors.dart';
+
+import '../errors/product_errors.dart';
 import '../mappers/product_mapper.dart';
 
 class ProductsDatasoureImpl extends ProductsDatasource {
@@ -26,13 +27,14 @@ class ProductsDatasoureImpl extends ProductsDatasource {
   Future<Product> createUpdateProduct(Map<String, dynamic> productLike) async{
     
     try {
-      final String? productId = productLike['id'];  
+      
+      final String? productId = productLike['id'];
       final String method = (productId == null) ? 'POST' : 'PATCH';
-      final String url = (productId == null) ? '/post' : '/products/$productId';
+      final String url = (productId == null) ? '/products' : '/products/$productId';
 
-      productLike.remove('id'); 
+      productLike.remove('id');
 
-      final responde = await dio.request(
+      final response = await dio.request(
         url,
         data: productLike,
         options: Options(
@@ -40,7 +42,7 @@ class ProductsDatasoureImpl extends ProductsDatasource {
         )
       );
 
-      final product = ProductMapper.jsonToEntity(responde.data);
+      final product = ProductMapper.jsonToEntity(response.data);
       return product;
 
     } catch (e) {

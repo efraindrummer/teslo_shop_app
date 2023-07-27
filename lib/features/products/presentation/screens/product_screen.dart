@@ -1,58 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:teslo_shop/features/products/domain/domain.dart';
 import 'package:teslo_shop/features/products/presentation/providers/providers.dart';
-import 'package:teslo_shop/features/shared/widgets/widgets.dart';
+import 'package:teslo_shop/features/shared/shared.dart';
 
-class ProductSreen extends ConsumerWidget {
-
+class ProductScreen extends ConsumerWidget {
   final String productId;
-  
-  const ProductSreen({super.key, required this.productId});
 
-  void showSnackbar(BuildContext context) {
+  const ProductScreen({super.key, required this.productId});
+
+  void showSnackbar( BuildContext context ) {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Producto Actualizado'))
     );
   }
 
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    
+    final productState = ref.watch( productProvider(productId) );
 
-    final productState = ref.watch(productProvider(productId));
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar Producto'),
-        actions: [
-          IconButton(
-            onPressed: (){}, 
-            icon: const Icon(Icons.camera_alt_outlined)
-          ),
-        ],
-      ),
-      body: productState.isLoading 
-        ? const FullScreenLoader() 
-        : _ProductView(product: productState.product!),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          
-          if(productState.product == null) return;
-
-          ref.read(productFormProvider(productState.product!).notifier)
-            .onFormSubmit()
-            .then(
-              (value) {
-                if(!value) return;
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Editar Producto'),
+          actions: [
+            IconButton(onPressed: () {
+    
+            }, 
+            icon: const Icon( Icons.camera_alt_outlined ))
+          ],
+        ),
+    
+        body: productState.isLoading 
+          ? const FullScreenLoader()
+          : _ProductView(product: productState.product! ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            if ( productState.product == null ) return;
+    
+            ref.read(
+              productFormProvider(productState.product!).notifier
+            ).onFormSubmit()
+              .then((value) {
+                if ( !value ) return;
                 showSnackbar(context);
-            });
-        },
-        child: const Icon(Icons.save_as_outlined),
+              });
+    
+            
+          },
+          child: const Icon( Icons.save_as_outlined ),
+        ),
       ),
     );
   }
 }
+
 
 class _ProductView extends ConsumerWidget {
 
@@ -63,7 +70,8 @@ class _ProductView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
 
-    final productForm = ref.watch(productFormProvider(product));
+    final productForm = ref.watch( productFormProvider(product) );
+
 
     final textStyles = Theme.of(context).textTheme;
 
@@ -77,7 +85,13 @@ class _ProductView extends ConsumerWidget {
           ),
     
           const SizedBox( height: 10 ),
-          Center(child: Text( productForm.title.value, style: textStyles.titleSmall, textAlign: TextAlign.center, )),
+          Center(
+            child: Text( 
+              productForm.title.value, 
+              style: textStyles.titleSmall,
+              textAlign: TextAlign.center,
+            )
+          ),
           const SizedBox( height: 10 ),
           _ProductInformation( product: product ),
           
@@ -94,7 +108,8 @@ class _ProductInformation extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref ) {
 
-    final productForm = ref.watch(productFormProvider(product));
+    final productForm = ref.watch( productFormProvider(product) );
+
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -107,21 +122,25 @@ class _ProductInformation extends ConsumerWidget {
             isTopField: true,
             label: 'Nombre',
             initialValue: productForm.title.value,
-            onChanged: ref.read(productFormProvider(product).notifier).onTitleChanged,
+            onChanged: ref.read( productFormProvider(product).notifier).onTitleChanged,
             errorMessage: productForm.title.errorMessage,
           ),
-          CustomProductField(
+
+          CustomProductField( 
             label: 'Slug',
             initialValue: productForm.slug.value,
-            onChanged: ref.read(productFormProvider(product).notifier).onSlugChanged,
+            onChanged: ref.read( productFormProvider(product).notifier).onSlugChanged,
             errorMessage: productForm.slug.errorMessage,
           ),
+
           CustomProductField( 
             isBottomField: true,
             label: 'Precio',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             initialValue: productForm.price.value.toString(),
-            onChanged: (value) => ref.read(productFormProvider(product).notifier).onPriceChanged(double.tryParse(value) ?? -1),
+            onChanged: (value) 
+              => ref.read( productFormProvider(product).notifier)
+                .onPriceChanged( double.tryParse(value) ?? -1 ),
             errorMessage: productForm.price.errorMessage,
           ),
 
@@ -130,12 +149,12 @@ class _ProductInformation extends ConsumerWidget {
 
           _SizeSelector(
             selectedSizes: productForm.sizes,
-            onSizesChanged: ref.read(productFormProvider(product).notifier).onSizedChanged,
+            onSizesChanged: ref.read( productFormProvider(product).notifier).onSizeChanged,
           ),
           const SizedBox(height: 5 ),
-          _GenderSelector(
+          _GenderSelector( 
             selectedGender: productForm.gender,
-            onGenderChanged: ref.read(productFormProvider(product).notifier).onGenderChanged,
+            onGenderChanged: ref.read( productFormProvider(product).notifier).onGenderChanged,
           ),
           
 
@@ -145,7 +164,9 @@ class _ProductInformation extends ConsumerWidget {
             label: 'Existencias',
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             initialValue: productForm.inStock.value.toString(),
-            onChanged: (value) => ref.read(productFormProvider(product).notifier).onStockChanged(int.tryParse(value) ?? -1),
+            onChanged: ( value ) 
+              => ref.read( productFormProvider(product).notifier)
+                .onStockChanged( int.tryParse(value) ?? -1 ),
             errorMessage: productForm.inStock.errorMessage,
           ),
 
@@ -154,7 +175,7 @@ class _ProductInformation extends ConsumerWidget {
             label: 'Descripción',
             keyboardType: TextInputType.multiline,
             initialValue: product.description,
-            onChanged: ref.read(productFormProvider(product).notifier).onDescriptionChanged,
+            onChanged: ref.read( productFormProvider(product).notifier).onDescriptionChanged,
           ),
 
           CustomProductField( 
@@ -163,7 +184,7 @@ class _ProductInformation extends ConsumerWidget {
             label: 'Tags (Separados por coma)',
             keyboardType: TextInputType.multiline,
             initialValue: product.tags.join(', '),
-            onChanged: ref.read(productFormProvider(product).notifier).onTagsChanged,
+            onChanged: ref.read( productFormProvider(product).notifier).onTagsChanged,
           ),
 
 
@@ -200,8 +221,8 @@ class _SizeSelector extends StatelessWidget {
       }).toList(), 
       selected: Set.from( selectedSizes ),
       onSelectionChanged: (newSelection) {
-        //print(newSelection);
-        onSizesChanged(List.from(newSelection));
+        FocusScope.of(context).unfocus();
+        onSizesChanged( List.from(newSelection) );
       },
       multiSelectionEnabled: true,
     );
@@ -209,10 +230,11 @@ class _SizeSelector extends StatelessWidget {
 }
 
 class _GenderSelector extends StatelessWidget {
-
-  final void Function(String selectedGender) onGenderChanged;
-
+  
   final String selectedGender;
+  final void Function( String selectedGender) onGenderChanged;
+
+
   final List<String> genders = const['men','women','kid'];
   final List<IconData> genderIcons = const[
     Icons.man,
@@ -242,7 +264,7 @@ class _GenderSelector extends StatelessWidget {
         }).toList(), 
         selected: { selectedGender },
         onSelectionChanged: (newSelection) {
-          //print(newSelection);
+          FocusScope.of(context).unfocus();
           onGenderChanged(newSelection.first);
         },
       ),

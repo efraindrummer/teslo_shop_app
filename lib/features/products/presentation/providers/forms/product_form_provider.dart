@@ -1,7 +1,8 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:formz/formz.dart';
-import 'package:teslo_shop/config/config.dart';
+import 'package:teslo_shop/config/constants/environment.dart';
+
 import 'package:teslo_shop/features/products/domain/domain.dart';
 import 'package:teslo_shop/features/products/presentation/providers/providers.dart';
 import 'package:teslo_shop/features/shared/shared.dart';
@@ -29,13 +30,13 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
   ProductFormNotifier({
     this.onSubmitCallback,
     required Product product,
-  }) : super (
+  }): super(
     ProductFormState(
       id: product.id,
       title: Title.dirty(product.title),
       slug: Slug.dirty(product.slug),
       price: Price.dirty(product.price),
-      inStock: Stock.dirty(product.stock),
+      inStock: Stock.dirty( product.stock ),
       sizes: product.sizes,
       gender: product.gender,
       description: product.description,
@@ -51,22 +52,22 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
     if(onSubmitCallback == null) return false;
 
     final productLike = {
-      'id': state.id,
+      'id' : (state.id == 'new') ? null : state.id,
       'title': state.title.value,
       'price': state.price.value,
       'description': state.description,
       'slug': state.slug.value,
       'stock': state.inStock.value,
-      'sized': state.sizes,
+      'sizes': state.sizes,
       'gender': state.gender,
       'tags': state.tags.split(','),
       'images': state.images.map(
-        (image) => image.replaceAll('${Environment.apiUrl}/files/product/', '')
+        (image) => image.replaceAll('${ Environment.apiUrl }/files/product/', '')
       ).toList()
     };
 
     try {
-      return await onSubmitCallback!(productLike);
+      return await onSubmitCallback!( productLike );
     } catch (e) {
       return false;
     }
@@ -74,18 +75,19 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
     //return true;
   }
 
-  void _touchedEverything(){
+  void _touchedEverything() {
     state = state.copyWith(
       isFormValid: Formz.validate([
         Title.dirty(state.title.value),
         Slug.dirty(state.slug.value),
         Price.dirty(state.price.value),
         Stock.dirty(state.inStock.value),
-      ])
+      ]),
     );
   }
 
-  void onTitleChanged(String value){
+
+  void onTitleChanged( String value ) {
     state = state.copyWith(
       title: Title.dirty(value),
       isFormValid: Formz.validate([
@@ -97,7 +99,7 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
     );
   }
 
-  void onSlugChanged(String value){
+  void onSlugChanged( String value ) {
     state = state.copyWith(
       slug: Slug.dirty(value),
       isFormValid: Formz.validate([
@@ -109,7 +111,7 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
     );
   }
 
-  void onPriceChanged(double value){
+  void onPriceChanged( double value ) {
     state = state.copyWith(
       price: Price.dirty(value),
       isFormValid: Formz.validate([
@@ -121,7 +123,7 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
     );
   }
 
-  void onStockChanged(int value){
+  void onStockChanged( int value ) {
     state = state.copyWith(
       inStock: Stock.dirty(value),
       isFormValid: Formz.validate([
@@ -133,27 +135,27 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
     );
   }
 
-  void onSizedChanged(List<String> sizes){
+  void onSizeChanged( List<String> sizes ) {
     state = state.copyWith(
-      sizes: sizes,
+      sizes: sizes
     );
   }
 
-  void onGenderChanged(String gender){
+  void onGenderChanged( String gender ) {
     state = state.copyWith(
-      gender: gender,
+      gender: gender
     );
   }
 
-  void onDescriptionChanged(String description){
+  void onDescriptionChanged( String description ) {
     state = state.copyWith(
-      description: description,
+      description: description
     );
   }
 
-  void onTagsChanged(String tags){
+  void onTagsChanged( String tags ) {
     state = state.copyWith(
-      tags: tags,
+      tags: tags
     );
   }
 
@@ -198,7 +200,7 @@ class ProductFormState {
     Stock? inStock,
     String? description,
     String? tags,
-    List<String>? images
+    List<String>? images,
   }) => ProductFormState(
     isFormValid: isFormValid ?? this.isFormValid,
     id: id ?? this.id,
